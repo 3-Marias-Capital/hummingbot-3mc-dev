@@ -92,3 +92,8 @@ coverage.xml
 # External SDK files
 /**/.chain_cookie
 /**/.injective_cookie
+/hummingbot-3mc.iml
+/notes.md
+/.aider.conf.yml
+.aider*
+/hummingbot-3mc-dev.iml
