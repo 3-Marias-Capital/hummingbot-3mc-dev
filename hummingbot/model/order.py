@@ -10,6 +10,7 @@ from sqlalchemy import (
     Index,
     Integer,
     Text,
+    String
 )
 from sqlalchemy.orm import relationship
 
@@ -28,10 +29,10 @@ class Order(HummingbotBase):
                       Index("o_market_quote_asset_timestamp_index",
                             "market", "quote_asset", "creation_timestamp"))
 
-    id = Column(Text, primary_key=True, nullable=False)
+    id = Column(String(255), primary_key=True, nullable=False)
     config_file_path = Column(Text, nullable=False)
     strategy = Column(Text, nullable=False)
-    market = Column(Text, nullable=False)
+    market = Column(String(255), nullable=False)
     symbol = Column(Text, nullable=False)
     base_asset = Column(Text, nullable=False)
     quote_asset = Column(Text, nullable=False)

@@ -10,6 +10,7 @@ from sqlalchemy import (
     Index,
     BigInteger,
     Float,
+    String
 )
 from sqlalchemy.orm import (
     Session
@@ -29,7 +30,7 @@ class FundingPayment(HummingbotBase):
 
     timestamp = Column(BigInteger, primary_key=True, nullable=False)
     config_file_path = Column(Text, nullable=False)
-    market = Column(Text, nullable=False)
+    market = Column(String(255), nullable=False)
     rate = Column(Float, nullable=False)
     symbol = Column(Text, nullable=False)
     amount = Column(Float, nullable=False)
