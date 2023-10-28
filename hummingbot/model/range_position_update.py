@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from sqlalchemy import JSON, BigInteger, Column, Index, Integer, Text, String
+from sqlalchemy import JSON, BigInteger, Column, Index, Integer, String, Text
 
 from . import HummingbotBase
 

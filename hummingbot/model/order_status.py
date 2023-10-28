@@ -1,17 +1,7 @@
 #!/usr/bin/env python
-from typing import (
-    Dict,
-    Any
-)
-from sqlalchemy import (
-    Column,
-    Text,
-    Integer,
-    BigInteger,
-    ForeignKey,
-    Index,
-    String
-)
+from typing import Any, Dict
+
+from sqlalchemy import BigInteger, Column, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from . import HummingbotBase
