@@ -134,3 +134,23 @@ To have your pull request merged into the codebase, submit a [Pull Request Propo
 
 * **License**: Hummingbot is licensed under [Apache 2.0](./LICENSE).
 * **Data collection**: read important information regarding [Hummingbot Data Collection](./DATA_COLLECTION.md).
+
+##
+
+```bash
+conda activate hummingbot
+
+./install
+
+./compile
+
+pip install pandas
+pip install numpy
+pip install scipy
+pip install Sphinx
+pip install numpydoc
+pip install nose
+pip install pykalman
+
+./start
+```
