@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy
 import pandas as pd
-from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Index, Integer, Text, String
+from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Session, relationship
 
 from hummingbot.core.event.events import PositionAction
