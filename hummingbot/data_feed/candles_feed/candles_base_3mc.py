@@ -5,6 +5,7 @@ from typing import Optional
 
 import pandas as pd
 from bidict import bidict
+from hummingbot.data_feed.candles_feed.candles_base import CandlesBase
 
 from hummingbot.core.api_throttler.async_throttler import AsyncThrottler
 from hummingbot.core.network_base import NetworkBase
@@ -14,7 +15,7 @@ from hummingbot.core.web_assistant.web_assistants_factory import WebAssistantsFa
 from hummingbot.core.web_assistant.ws_assistant import WSAssistant
 
 
-class CandlesBase(NetworkBase):
+class CandlesBase3MC(CandlesBase):
     """
     This class serves as a base class for fetching and storing candle data from a cryptocurrency exchange.
     The class uses the Rest and WS Assistants for all the IO operations, and a double-ended queue to store candles.
@@ -42,21 +43,12 @@ class CandlesBase(NetworkBase):
     columns = ["timestamp", "open", "high", "low", "close", "volume", "quote_asset_volume",
                "n_trades", "taker_buy_base_volume", "taker_buy_quote_volume"]
 
-    def __init__(self, trading_pair: str, interval: str = "1m", max_records: int = 150):
-        super().__init__()
-        async_throttler = AsyncThrottler(rate_limits=self.rate_limits)
-        self._api_factory = WebAssistantsFactory(throttler=async_throttler)
-        self._candles = deque(maxlen=max_records)
+    def __init__(self, trading_pair: str, interval: str = "1m", max_records: int = 150, tick_size: int = 500, dollar_size: int = 100000):
+        super().__init__(trading_pair, interval, max_records)
         self._candles_tick = deque(maxlen=max_records)
-        self._listen_candles_task: Optional[asyncio.Task] = None
-        self._trading_pair = trading_pair
-        self._ex_trading_pair = self.get_exchange_trading_pair(trading_pair)
-        if interval in self.intervals.keys():
-            self.interval = interval
-        else:
-            self.logger().exception(
-                f"Interval {interval} is not supported. Available Intervals: {self.intervals.keys()}")
-            raise
+        self._candles_dollar = deque(maxlen=max_records)
+        self._tick_size = tick_size
+        self._dollar_size = dollar_size
 
     async def start_network(self):
         """
@@ -79,6 +71,14 @@ class CandlesBase(NetworkBase):
         This property returns a boolean indicating whether the _candles deque has reached its maximum length.
         """
         return len(self._candles) == self._candles.maxlen
+
+    @property
+    def is_tick_ready(self):
+        return len(self._candles_tick) == self._candles_tick.maxlen
+
+    @property
+    def is_dollar_ready(self):
+        return len(self._candles_dollar) == self._candles_dollar.maxlen
 
     @property
     def name(self):
@@ -117,6 +117,14 @@ class CandlesBase(NetworkBase):
         This property returns the candles stored in the _candles deque as a Pandas DataFrame.
         """
         return pd.DataFrame(self._candles, columns=self.columns, dtype=float)
+
+    @property
+    def ticks_df(self) -> pd.DataFrame:
+        return pd.DataFrame(self._candles_tick, columns=self.columns, dtype=float)
+
+    @property
+    def dollars_df(self) -> pd.DataFrame:
+        return pd.DataFrame(self._candles_dollar, columns=self.columns, dtype=float)
 
     def get_exchange_trading_pair(self, trading_pair):
         raise NotImplementedError
