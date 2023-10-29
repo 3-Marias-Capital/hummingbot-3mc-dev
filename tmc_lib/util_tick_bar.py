@@ -8,7 +8,7 @@ from decimal import Decimal
 
 from pandas import Timestamp
 
-from hummingbot.tmc_lib.trade_type import TradeType
+from tmc_lib.trade_type import TradeType
 
 
 class TickBarUtil:

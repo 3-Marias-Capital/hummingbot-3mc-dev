@@ -13,7 +13,7 @@ from hummingbot.data_feed.candles_feed.candles_base_3mc import CandlesBase3MC
 from hummingbot.logger import HummingbotLogger
 from datetime import datetime
 
-from hummingbot.tmc_lib.util_tick_bar import TickBarUtil
+from tmc_lib.util_tick_bar import TickBarUtil
 
 
 class BinancePerpetualCandles3MC(CandlesBase3MC):
