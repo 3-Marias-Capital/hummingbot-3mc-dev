@@ -48,9 +48,9 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
                 CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="30m", max_records=500, tick_size=150),
             ],
             leverage=leverage_by_trading_pair[trading_pair],
-            sma1_length=25,
-            sma2_length=50,
-            sma3_length=100,
+            sma1_length=14,
+            sma2_length=25,
+            sma3_length=50,
             angle_length=5
         )
         controller = DanTrendMaV1(config=config)

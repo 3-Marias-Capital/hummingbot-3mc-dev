@@ -37,8 +37,8 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         """
         tick_df = self.get_processed_data()
         return (
-                (tick_df['sma2_angle'].iloc[-1] > 30 and tick_df['sma3_angle'].iloc[-1] > 30 and tick_df['sma1_angle'].iloc[-1] < 0) or
-                (tick_df['sma2_angle'].iloc[-1] < -30 and tick_df['sma3_angle'].iloc[-1] < -30 and tick_df['sma1_angle'].iloc[-1] > 0)
+                (tick_df['sma2_angle'].iloc[-1] > 10 and tick_df['sma3_angle'].iloc[-1] > 20 and tick_df['sma1_angle'].iloc[-1] < 0) or
+                (tick_df['sma2_angle'].iloc[-1] < -20 and tick_df['sma3_angle'].iloc[-1] < -10 and tick_df['sma1_angle'].iloc[-1] > 0)
         )
 
     def cooldown_condition(self, executor: PositionExecutor, order_level: OrderLevel) -> bool:
