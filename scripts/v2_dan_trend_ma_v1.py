@@ -27,14 +27,7 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
         open_order_type=OrderType.MARKET
     )
 
-    order_levels = [
-        OrderLevel(level=0, side=TradeType.BUY, order_amount_usd=Decimal("15"),
-                   spread_factor=Decimal(0.5), order_refresh_time=60 * 5,
-                   cooldown_time=15, triple_barrier_conf=triple_barrier_conf),
-        OrderLevel(level=0, side=TradeType.SELL, order_amount_usd=Decimal("15"),
-                   spread_factor=Decimal(0.5), order_refresh_time=60 * 5,
-                   cooldown_time=15, triple_barrier_conf=triple_barrier_conf),
-    ]
+    order_levels = []
     controllers = {}
     markets = {}
     executor_handlers = {}
