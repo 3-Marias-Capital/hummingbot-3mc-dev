@@ -66,16 +66,16 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
             self.config.order_levels = []
             # Generate signal
             long_condition = (
-                    tick_df['sma1_angle'].iloc[-1] > tick_df['sma2_angle'].iloc[-1] > tick_df['sma3_angle'].iloc[-1] and
+                    tick_df[f"SMA_{self.config.sma1_length}"].iloc[-1] > tick_df[f"SMA_{self.config.sma2_length}"].iloc[-1] > tick_df[f"SMA_{self.config.sma3_length}"].iloc[-1] and
                     tick_df['sma1_angle'].iloc[-1] > 30 and
-                    tick_df['sma2_angle'].iloc[-1] > 30 and
-                    tick_df['sma3_angle'].iloc[-1] > 30
+                    tick_df['sma2_angle'].iloc[-1] > 20 and
+                    tick_df['sma3_angle'].iloc[-1] > 10
             )
             short_condition = (
-                    tick_df['sma1_angle'].iloc[-1] < tick_df['sma2_angle'].iloc[-1] < tick_df['sma3_angle'].iloc[-1] and
+                    tick_df[f"SMA_{self.config.sma1_length}"] < tick_df[f"SMA_{self.config.sma2_length}"] < tick_df[f"SMA_{self.config.sma3_length}"] and
                     tick_df['sma1_angle'].iloc[-1] < -30 and
-                    tick_df['sma2_angle'].iloc[-1] < -30 and
-                    tick_df['sma3_angle'].iloc[-1] < -30
+                    tick_df['sma2_angle'].iloc[-1] < -20 and
+                    tick_df['sma3_angle'].iloc[-1] < -10
             )
             triple_barrier_conf = TripleBarrierConf(
                 stop_loss=Decimal("0.01"), take_profit=Decimal("0.03"),
