@@ -9,7 +9,7 @@ import pandas_ta as ta  # noqa: F401
 from hummingbot import data_path
 from hummingbot.connector.connector_base import ConnectorBase
 from hummingbot.core.data_type.common import OrderType, PositionAction, PositionMode, PositionSide, TradeType
-from hummingbot.data_feed.candles_feed.candles_base import CandlesBase
+from hummingbot.data_feed.candles_feed.candles_base_3mc import CandlesBase3MC
 from hummingbot.smart_components.executors.position_executor.data_types import PositionConfig, TrailingStop
 from hummingbot.smart_components.executors.position_executor.position_executor import PositionExecutor
 from hummingbot.strategy.script_strategy_base import ScriptStrategyBase
@@ -68,7 +68,7 @@ class DirectionalStrategyBase(ScriptStrategyBase):
     cooldown_after_execution = 30
 
     # Create the candles that we want to use and the thresholds for the indicators
-    candles: List[CandlesBase]
+    candles: List[CandlesBase3MC]
 
     # Configure the leverage and order amount the bot is going to use
     set_leverage_flag = None

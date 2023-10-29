@@ -43,7 +43,7 @@ class CandlesBase3MC(CandlesBase):
     columns = ["timestamp", "open", "high", "low", "close", "volume", "quote_asset_volume",
                "n_trades", "taker_buy_base_volume", "taker_buy_quote_volume"]
 
-    def __init__(self, trading_pair: str, interval: str = "1m", max_records: int = 150, tick_size: int = 500, dollar_size: int = 100000):
+    def __init__(self, trading_pair: str, interval: str = "1m", max_records: int = 150, tick_size: int = 0, dollar_size: int = 0):
         super().__init__(trading_pair, interval, max_records)
         self._candles_tick = deque(maxlen=max_records)
         self._candles_dollar = deque(maxlen=max_records)
@@ -70,14 +70,16 @@ class CandlesBase3MC(CandlesBase):
         """
         This property returns a boolean indicating whether the _candles deque has reached its maximum length.
         """
-        return len(self._candles) == self._candles.maxlen
+        return len(self._candles) == self._candles.maxlen and self.is_tick_ready and self.is_dollar_ready
 
     @property
     def is_tick_ready(self):
+        if self._tick_size == 0: return True
         return len(self._candles_tick) == self._candles_tick.maxlen
 
     @property
     def is_dollar_ready(self):
+        if self._dollar_size == 0: return True
         return len(self._candles_dollar) == self._candles_dollar.maxlen
 
     @property
