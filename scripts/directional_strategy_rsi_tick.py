@@ -90,14 +90,15 @@ class RSI(DirectionalStrategyBase):
         Returns:
             pd.DataFrame: The processed dataframe with RSI values.
         """
-        candles_df = self.candles[0].candles_df
-        candles_df.ta.rsi(length=7, append=True)
+        # candles_df = self.candles[0].candles_df
+        # candles_df.ta.rsi(length=7, append=True)
 
-        self.tick_df = self.candles[0].ticks_df
-        if len(self.tick_df) > 7:
-            self.rsi_df = ta.rsi(self.candles[0].ticks_df["close"], length=7)
+        tick_df = self.candles[0].ticks_df
+        if len(tick_df) > 7:
+            tick_df.ta.rsi(length=7, append=True)
+            # self.rsi_df = ta.rsi(tick_df["close"],7)
 
-        return candles_df
+        return tick_df
 
     def market_data_extra_info(self):
         """
@@ -106,8 +107,11 @@ class RSI(DirectionalStrategyBase):
             List[str]: A list of formatted strings containing market data information.
         """
         lines = []
-        columns_to_show = ["timestamp", "open", "low", "high", "close", "volume", "RSI_7"]
         candles_df = self.get_processed_df()
+        if len(candles_df) > 7:
+            columns_to_show = ["timestamp", "open", "low", "high", "close", "volume", "RSI_7"]
+        else:
+            columns_to_show = ["timestamp", "open", "low", "high", "close", "volume"]
         lines.extend([f"Candles: {self.candles[0].name} | Interval: {self.candles[0].interval}\n"])
         lines.extend(self.candles_formatted_list(candles_df, columns_to_show))
         last_tick_bar = self.candles[0].ticks_df.tail(1)
@@ -118,7 +122,7 @@ class RSI(DirectionalStrategyBase):
         low = last_tick_bar['low'].values.flatten()[0]
         close = last_tick_bar['close'].values.flatten()[0]
         volume = last_tick_bar['volume'].values.flatten()[0]
-        current_rsi = self.rsi_df.tail(1).values.flatten()[0] if len(self.rsi_df) > 0 else 0
-        lines.extend([f"Ticks:{tick_count} trades: {trades} open:{open} high:{high} low:{low} close:{close} volume:{volume} RSI:{current_rsi}\n"])
+        # current_rsi = self.rsi_df.tail(1).values.flatten()[0] if len(self.rsi_df) > 0 else 0
+        lines.extend([f"Ticks:{tick_count} trades: {trades} open:{open} high:{high} low:{low} close:{close} volume:{volume}\n"])
         lines.extend([f"==================================================================================================="])
         return lines

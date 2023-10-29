@@ -17,13 +17,16 @@ class DanTrendMaV1Config(DirectionalTradingControllerConfigBase):
     sma1_length:int = Field(default=25, ge=2, le=500)
     sma2_length:int = Field(default=50, ge=2, le=500)
     sma3_length:int = Field(default=100, ge=2, le=500)
+    angle_length:int = Field(default=3, ge=3, le=100)
     std_span: Optional[int] = None
 
 
 class DanTrendMaV1(DirectionalTradingControllerBase):
+    min_tick_bars: int = 100
     def __init__(self, config: DanTrendMaV1Config):
         super().__init__(config)
         self.config = config
+        max_length = 
 
     def early_stop_condition(self, executor: PositionExecutor, order_level: OrderLevel) -> bool:
         """
@@ -46,11 +49,9 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         tick_df = self.candles[0].ticks_df
 
         # Add indicators
-        tick_df.ta.bbands(length=self.config.bb_length, std=self.config.bb_std, append=True)
-        tick_df.ta.macd(fast=self.config.macd_fast, slow=self.config.macd_slow, signal=self.config.macd_signal, append=True)
-        # bbp = tick_df[f"BBP_{self.config.bb_length}_{self.config.bb_std}"]
-        # macdh = tick_df[f"MACDh_{self.config.macd_fast}_{self.config.macd_slow}_{self.config.macd_signal}"]
-        # macd = tick_df[f"MACD_{self.config.macd_fast}_{self.config.macd_slow}_{self.config.macd_signal}"]
+        tick_df.ta.sma(length=self.config.sma1_length, append=True)
+        tick_df.ta.sma(length=self.config.sma2_length, append=True)
+        tick_df.ta.sma(length=self.config.sma3_length, append=True)
 
         # Generate signal
         # long_condition = (bbp < self.config.bb_long_threshold) & (macdh > 0) & (macd < 0)
