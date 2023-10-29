@@ -36,10 +36,12 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         If an executor has an active position, should we close it based on a condition.
         """
         tick_df = self.get_processed_data()
-        return (
-                (tick_df['sma2_angle'].iloc[-1] > 10 and tick_df['sma3_angle'].iloc[-1] > 20 and tick_df['sma1_angle'].iloc[-1] < 0) or
-                (tick_df['sma2_angle'].iloc[-1] < -20 and tick_df['sma3_angle'].iloc[-1] < -10 and tick_df['sma1_angle'].iloc[-1] > 0)
-        )
+        if len(tick_df) > self.min_tick_bars:
+            return (
+                    (tick_df['sma2_angle'].iloc[-1] > 10 and tick_df['sma3_angle'].iloc[-1] > 20 and tick_df['sma1_angle'].iloc[-1] < 0) or
+                    (tick_df['sma2_angle'].iloc[-1] < -20 and tick_df['sma3_angle'].iloc[-1] < -10 and tick_df['sma1_angle'].iloc[-1] > 0)
+            )
+        return False
 
     def cooldown_condition(self, executor: PositionExecutor, order_level: OrderLevel) -> bool:
         """
