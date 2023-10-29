@@ -48,17 +48,20 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
                 CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="30m", max_records=150, tick_size=150),
             ],
             leverage=leverage_by_trading_pair[trading_pair],
-            sma1_length=15,
-            sma2_length=50,
-            sma3_length=100,
+            sma1_length=2,
+            sma2_length=5,
+            sma3_length=10,
+            angle_length=3
         )
         controller = DanTrendMaV1(config=config)
+
         markets = controller.update_strategy_markets_dict(markets)
         controllers[trading_pair] = controller
 
     def __init__(self, connectors: Dict[str, ConnectorBase]):
         super().__init__(connectors)
         for trading_pair, controller in self.controllers.items():
+            self.logger().info(f"Minimum tick bars needed for {controller.config.trading_pair} is {controller.min_tick_bars}")
             self.executor_handlers[trading_pair] = DirectionalTradingExecutorHandler(strategy=self, controller=controller)
 
     def on_stop(self):
@@ -71,6 +74,8 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
         market conditions, you can orchestrate from this script when to stop or start them.
         """
         for executor_handler in self.executor_handlers.values():
+
+
             if executor_handler.status == ExecutorHandlerStatus.NOT_STARTED:
                 executor_handler.start()
 

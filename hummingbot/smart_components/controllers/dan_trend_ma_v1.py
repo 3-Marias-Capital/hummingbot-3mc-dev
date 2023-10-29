@@ -10,6 +10,7 @@ from hummingbot.smart_components.strategy_frameworks.directional_trading.directi
     DirectionalTradingControllerBase,
     DirectionalTradingControllerConfigBase,
 )
+from tmc_lib.ta_util import TAUtil
 
 
 class DanTrendMaV1Config(DirectionalTradingControllerConfigBase):
@@ -26,7 +27,8 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
     def __init__(self, config: DanTrendMaV1Config):
         super().__init__(config)
         self.config = config
-        max_length = 
+        max_length = max(config.sma1_length, config.sma2_length, config.sma3_length)
+        self.min_tick_bars = max_length * config.angle_length
 
     def early_stop_condition(self, executor: PositionExecutor, order_level: OrderLevel) -> bool:
         """
@@ -45,13 +47,15 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         return False
 
     def get_processed_data(self) -> pd.DataFrame:
-        # df = self.candles[0].candles_df
         tick_df = self.candles[0].ticks_df
 
-        # Add indicators
-        tick_df.ta.sma(length=self.config.sma1_length, append=True)
-        tick_df.ta.sma(length=self.config.sma2_length, append=True)
-        tick_df.ta.sma(length=self.config.sma3_length, append=True)
+        if len(tick_df) > self.min_tick_bars:
+            tick_df.ta.sma(length=self.config.sma1_length, append=True)
+            tick_df.ta.sma(length=self.config.sma2_length, append=True)
+            tick_df.ta.sma(length=self.config.sma3_length, append=True)
+            sma1_angle = TAUtil.generate_angle_pd_df(tick_df[f"SMA_{self.config.sma1_length}"],self.config.angle_length)
+            # sma1_angle is pd.DataFrame. how to add to tick_df and can access it via tick_df["sma1_angle"]?
+
 
         # Generate signal
         # long_condition = (bbp < self.config.bb_long_threshold) & (macdh > 0) & (macd < 0)
@@ -65,8 +69,19 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         #     df["target"] = df["close"].rolling(self.config.std_span).std() / df["close"]
         return tick_df
 
+    def to_format_status(self) -> list:
+        lines = super().to_format_status()
+        df = self.get_processed_data()
+        lines.extend([f"total tick bars: {len(df)}. Minimum of {self.min_tick_bars}. Tick size: {self.candles[0].tick_size}"])
+        return lines
+
     def extra_columns_to_show(self):
-        return []
+        lines = ["n_trades"]
+        tick_df = self.get_processed_data()
+        if len(tick_df) > self.min_tick_bars:
+            lines += [f"SMA_{self.config.sma1_length}",f"SMA_{self.config.sma2_length}",f"SMA_{self.config.sma3_length}"]
+
+        return lines
         # return [f"BBP_{self.config.bb_length}_{self.config.bb_std}",
         #         f"MACDh_{self.config.macd_fast}_{self.config.macd_slow}_{self.config.macd_signal}",
         #         f"MACD_{self.config.macd_fast}_{self.config.macd_slow}_{self.config.macd_signal}"]

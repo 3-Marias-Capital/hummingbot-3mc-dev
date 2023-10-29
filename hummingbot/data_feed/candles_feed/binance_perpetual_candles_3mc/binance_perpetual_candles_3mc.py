@@ -137,16 +137,16 @@ class BinancePerpetualCandles3MC(CandlesBase3MC):
             await ws.send(subscribe_trades_request)
             self.logger().info("Subscribed to public trades...")
 
-            tick_params = []
-            tick_params.append(f"{self._ex_trading_pair.lower()}@trades")
-            tick_payload = {
-                "method": "SUBSCRIBE",
-                "params": tick_params,
-                "id": 2
-            }
-            subscribe_trades_request: WSJSONRequest = WSJSONRequest(payload=tick_payload)
-            await ws.send(subscribe_trades_request)
-            self.logger().info("Subscribed to public trades...")
+            # tick_params = []
+            # tick_params.append(f"{self._ex_trading_pair.lower()}@trades")
+            # tick_payload = {
+            #     "method": "SUBSCRIBE",
+            #     "params": tick_params,
+            #     "id": 2
+            # }
+            # subscribe_trades_request: WSJSONRequest = WSJSONRequest(payload=tick_payload)
+            # await ws.send(subscribe_trades_request)
+            # self.logger().info("Subscribed to public trades...")
         except asyncio.CancelledError:
             raise
         except Exception:

@@ -83,6 +83,13 @@ class ControllerBase(ABC):
         """
         return all([candle.is_ready for candle in self.candles])
 
+    @property
+    def all_tick_bars_ready(self):
+        return all([candle.is_tick_ready for candle in self.candles])
+
+    def all_dollar_bars_ready(self):
+        return all([candle.is_dollar_ready for candle in self.candles])
+
     def start(self) -> None:
         """
         Start the controller.

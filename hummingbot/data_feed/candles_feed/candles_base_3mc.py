@@ -125,6 +125,10 @@ class CandlesBase3MC(CandlesBase):
         return pd.DataFrame(self._candles_tick, columns=self.columns, dtype=float)
 
     @property
+    def tick_size(self) -> int:
+        return self._tick_size
+
+    @property
     def dollars_df(self) -> pd.DataFrame:
         return pd.DataFrame(self._candles_dollar, columns=self.columns, dtype=float)
 
