@@ -5,11 +5,12 @@ import pandas as pd
 from pydantic import Field
 
 from hummingbot.smart_components.executors.position_executor.position_executor import PositionExecutor
-from hummingbot.smart_components.strategy_frameworks.data_types import OrderLevel
+from hummingbot.smart_components.strategy_frameworks.data_types import OrderLevel, TripleBarrierConf
 from hummingbot.smart_components.strategy_frameworks.directional_trading.directional_trading_controller_base import (
     DirectionalTradingControllerBase,
     DirectionalTradingControllerConfigBase,
 )
+from hummingbot.connector.connector_base import ConnectorBase, TradeType, Decimal, OrderType
 from tmc_lib.ta_util import TAUtil
 
 
@@ -34,7 +35,11 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         """
         If an executor has an active position, should we close it based on a condition.
         """
-        return False
+        tick_df = self.get_processed_data()
+        return (
+                (tick_df['sma2_angle'].iloc[-1] > 30 and tick_df['sma3_angle'].iloc[-1] > 30 and tick_df['sma1_angle'].iloc[-1] < 0) or
+                (tick_df['sma2_angle'].iloc[-1] < -30 and tick_df['sma3_angle'].iloc[-1] < -30 and tick_df['sma1_angle'].iloc[-1] > 0)
+        )
 
     def cooldown_condition(self, executor: PositionExecutor, order_level: OrderLevel) -> bool:
         """
@@ -53,16 +58,45 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
             tick_df.ta.sma(length=self.config.sma1_length, append=True)
             tick_df.ta.sma(length=self.config.sma2_length, append=True)
             tick_df.ta.sma(length=self.config.sma3_length, append=True)
-            sma1_angle = TAUtil.generate_angle_pd_df(tick_df[f"SMA_{self.config.sma1_length}"],self.config.angle_length)
-            # sma1_angle is pd.DataFrame. how to add to tick_df and can access it via tick_df["sma1_angle"]?
+            tick_df['sma1_angle'] = TAUtil.generate_angle_pd_df(tick_df[f"SMA_{self.config.sma1_length}"],self.config.angle_length)
+            tick_df['sma2_angle'] = TAUtil.generate_angle_pd_df(tick_df[f"SMA_{self.config.sma2_length}"],self.config.angle_length)
+            tick_df['sma3_angle'] = TAUtil.generate_angle_pd_df(tick_df[f"SMA_{self.config.sma3_length}"],self.config.angle_length)
+            self.config.order_levels = []
 
 
         # Generate signal
-        # long_condition = (bbp < self.config.bb_long_threshold) & (macdh > 0) & (macd < 0)
-        # short_condition = (bbp > self.config.bb_short_threshold) & (macdh < 0) & (macd > 0)
+        long_condition = (
+                tick_df['sma1_angle'].iloc[-1] > tick_df['sma2_angle'].iloc[-1] > tick_df['sma3_angle'].iloc[-1] and
+                tick_df['sma1_angle'].iloc[-1] > 30 and
+                tick_df['sma2_angle'].iloc[-1] > 30 and
+                tick_df['sma3_angle'].iloc[-1] > 30
+        )
+        short_condition = (
+                tick_df['sma1_angle'].iloc[-1] < tick_df['sma2_angle'].iloc[-1] < tick_df['sma3_angle'].iloc[-1] and
+                tick_df['sma1_angle'].iloc[-1] < -30 and
+                tick_df['sma2_angle'].iloc[-1] < -30 and
+                tick_df['sma3_angle'].iloc[-1] < -30
+        )
+        triple_barrier_conf = TripleBarrierConf(
+            stop_loss=Decimal("0.01"), take_profit=Decimal("0.03"),
+            time_limit=60 * 60 * 6,
+            open_order_type=OrderType.MARKET
+        )
+        if long_condition:
+            self.config.order_levels = [
+                OrderLevel(level=0, side=TradeType.BUY, order_amount_usd=Decimal("10"),
+                           spread_factor=Decimal(0), order_refresh_time=60 * 5,
+                           cooldown_time=15, triple_barrier_conf=triple_barrier_conf)
+            ]
+        if short_condition:
+            self.config.order_levels = [
+                OrderLevel(level=0, side=TradeType.SELL, order_amount_usd=Decimal("10"),
+                           spread_factor=Decimal(0), order_refresh_time=60 * 5,
+                           cooldown_time=15, triple_barrier_conf=triple_barrier_conf)
+            ]
         tick_df["signal"] = 0
-        # df.loc[long_condition, "signal"] = 1
-        # df.loc[short_condition, "signal"] = -1
+        tick_df.loc[long_condition, "signal"] = 1
+        tick_df.loc[short_condition, "signal"] = -1
 
         # Optional: Generate spread multiplier
         # if self.config.std_span:
@@ -79,7 +113,14 @@ class DanTrendMaV1(DirectionalTradingControllerBase):
         lines = ["n_trades"]
         tick_df = self.get_processed_data()
         if len(tick_df) > self.min_tick_bars:
-            lines += [f"SMA_{self.config.sma1_length}",f"SMA_{self.config.sma2_length}",f"SMA_{self.config.sma3_length}"]
+            lines += [
+                # f"SMA_{self.config.sma1_length}",
+                # f"SMA_{self.config.sma2_length}",
+                # f"SMA_{self.config.sma3_length}",
+                "sma1_angle",
+                "sma2_angle",
+                "sma3_angle",
+            ]
 
         return lines
         # return [f"BBP_{self.config.bb_length}_{self.config.bb_std}",
