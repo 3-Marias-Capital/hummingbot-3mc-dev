@@ -70,7 +70,7 @@ class CandlesBase3MC(CandlesBase):
         """
         This property returns a boolean indicating whether the _candles deque has reached its maximum length.
         """
-        return len(self._candles) == self._candles.maxlen and self.is_tick_ready and self.is_dollar_ready
+        return len(self._candles) == self._candles.maxlen #and self.is_tick_ready and self.is_dollar_ready
 
     @property
     def is_tick_ready(self):

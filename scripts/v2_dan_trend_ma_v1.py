@@ -24,8 +24,6 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
     triple_barrier_conf = TripleBarrierConf(
         stop_loss=Decimal("0.01"), take_profit=Decimal("0.03"),
         time_limit=60 * 60 * 6,
-        trailing_stop_activation_price_delta=None,
-        trailing_stop_trailing_delta=None,
         open_order_type=OrderType.MARKET
     )
 
@@ -47,7 +45,7 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
             trading_pair=trading_pair,
             order_levels=order_levels,
             candles_config=[
-                CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="3m", max_records=500, tick_size=150),
+                CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="30m", max_records=150, tick_size=150),
             ],
             leverage=leverage_by_trading_pair[trading_pair],
             sma1_length=15,
@@ -85,4 +83,5 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
                 lines.extend(
                     [f"Strategy: {executor_handler.controller.config.strategy_name} | Trading Pair: {trading_pair}",
                      executor_handler.to_format_status()])
+
         return "\n".join(lines)
