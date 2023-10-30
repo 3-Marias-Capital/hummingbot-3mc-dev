@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Dict
 
+from hummingbot.client.ui.interface_utils import format_df_for_printout
 from hummingbot.connector.connector_base import ConnectorBase, TradeType
 from hummingbot.core.data_type.common import OrderType
 from hummingbot.data_feed.candles_feed.candles_factory import CandlesConfig
@@ -27,7 +28,15 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
         open_order_type=OrderType.MARKET
     )
 
-    order_levels = []
+    order_levels = [
+        OrderLevel(level=0, side=TradeType.SELL, order_amount_usd=Decimal("5"),
+                   spread_factor=Decimal(0), order_refresh_time=60 * 5,
+                   cooldown_time=60, triple_barrier_conf=triple_barrier_conf),
+
+        OrderLevel(level=0, side=TradeType.BUY, order_amount_usd=Decimal("5"),
+                   spread_factor=Decimal(0), order_refresh_time=60 * 5,
+                   cooldown_time=60, triple_barrier_conf=triple_barrier_conf)
+    ]
     controllers = {}
     markets = {}
     executor_handlers = {}
@@ -38,13 +47,13 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
             trading_pair=trading_pair,
             order_levels=order_levels,
             candles_config=[
-                CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="30m", max_records=500, tick_size=150),
+                CandlesConfig(connector="binance_perpetual", trading_pair=trading_pair, interval="30m", max_records=500, tick_size=25),
             ],
             leverage=leverage_by_trading_pair[trading_pair],
             sma1_length=14,
             sma2_length=25,
             sma3_length=50,
-            angle_length=5
+            angle_length=4
         )
         controller = DanTrendMaV1(config=config)
 
@@ -67,8 +76,6 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
         market conditions, you can orchestrate from this script when to stop or start them.
         """
         for executor_handler in self.executor_handlers.values():
-
-
             if executor_handler.status == ExecutorHandlerStatus.NOT_STARTED:
                 executor_handler.start()
 
@@ -81,5 +88,7 @@ class DanTrendMaV1Composed(ScriptStrategyBase):
                 lines.extend(
                     [f"Strategy: {executor_handler.controller.config.strategy_name} | Trading Pair: {trading_pair}",
                      executor_handler.to_format_status()])
-
+        bal_df = self.get_balance_df()
+        bal_str = format_df_for_printout(bal_df["Exchange", "Asset", "Total Balance", "Available Balance"], table_format="psql")
+        lines.extend([f"{bal_str}"])
         return "\n".join(lines)
